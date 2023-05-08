@@ -1,15 +1,24 @@
 use anyhow::Result;
-use axum::{response::Html, response::IntoResponse, routing::get, routing::post, Json, Router};
+use axum::{response::Html, response::IntoResponse, routing::get, routing::post, Json, Router, http::{Method, header}};
 use cyberdeck::*;
 use std::net::SocketAddr;
 use tokio::time::{sleep, Duration};
+
+//use tower::{ServiceBuilder, ServiceExt, Service};
+use tower_http::cors::{Any, CorsLayer};
 
 #[tokio::main]
 async fn main() {
     // build our application with a route
     let app = Router::new()
         .route("/", get(root))
-        .route("/connect", post(connect));
+        .route("/connect", post(connect))
+	.layer(CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any)
+	.allow_headers([header::CONTENT_TYPE]));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     println!("Running server on http://localhost:3000 ...");
@@ -43,6 +52,7 @@ async fn start_peer_connection(offer: String) -> Result<String> {
                     c.label(),
                     msg_str
                 );
+                c.send_text(format!("Echo {}", msg_str)).await.unwrap();
             }
             PeerEvent::DataChannelStateChange(c) => {
                 if c.ready_state() == RTCDataChannelState::Open {
