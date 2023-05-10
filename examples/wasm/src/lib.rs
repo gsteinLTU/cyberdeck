@@ -29,8 +29,8 @@ pub fn log(text: &str){
 
 #[wasm_bindgen]
 pub async fn run() {
-    let pc: Rc<RefCell<RtcPeerConnection>> = cyberdeck_client::create_peer_connection(None);
-    let send_channel = cyberdeck_client::create_data_channel(pc.clone(), "foo");
+    let pc: Rc<RefCell<RtcPeerConnection>> = cyberdeck_client_web_sys::create_peer_connection(None);
+    let send_channel = cyberdeck_client_web_sys::create_data_channel(pc.clone(), "foo");
     
     let onclose = Closure::<dyn Fn()>::new(|| {
         log("sendChannel has closed");
@@ -44,7 +44,7 @@ pub async fn run() {
         log(&format!("Message from DataChannel '{}' with payload '{}'", Reflect::get(&send_channel_clone.borrow(), &"label".into()).unwrap().as_string().unwrap(), Reflect::get(&e, &"data".into()).unwrap().as_string().unwrap()));
     });
 
-    cyberdeck_client::init_data_channel(send_channel.clone(), onclose, onopen, onmessage);
+    cyberdeck_client_web_sys::init_data_channel(send_channel.clone(), onclose, onopen, onmessage);
 
     PEER_CONNECTION.with(|p| {
         p.replace(Some(pc.clone()));
@@ -59,7 +59,7 @@ pub async fn run() {
         log(&Reflect::get(&pc_clone.borrow(), &"iceConnectionState".into()).unwrap().as_string().unwrap());
     });
     
-    cyberdeck_client::init_peer_connection(pc.clone(), "http://localhost:3000/connect".to_string().into(), oniceconnectionstatechange).await;
+    cyberdeck_client_web_sys::init_peer_connection(pc.clone(), "http://localhost:3000/connect".to_string().into(), oniceconnectionstatechange).await;
 }
 
 #[wasm_bindgen]
