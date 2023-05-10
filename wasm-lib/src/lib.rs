@@ -4,17 +4,19 @@ use js_sys::{Reflect, JSON, Object, Array, JsString};
 use wasm_bindgen::{prelude::Closure, JsValue, JsCast};
 use web_sys::{Request, RequestInit, RequestMode, Response, RtcPeerConnection, RtcDataChannel, RtcConfiguration, RtcSessionDescriptionInit, window };
 
-pub fn create_peer_connection() -> Rc<RefCell<RtcPeerConnection>> {
+/// Create an RtcPeerConnection with the given ICE/STUN server, defaulting to Google's STUN server
+pub fn create_peer_connection(ice_server: Option<String>) -> Rc<RefCell<RtcPeerConnection>> {
     let mut config = RtcConfiguration::new();
     let config_servers = Array::new(); 
-    let ice_server = Object::new();
-    Reflect::set(&ice_server, &"urls".into(), &"stun:stun.l.google.com:19302".into()).unwrap();
-    config_servers.push(&ice_server);
+    let ice_server_js = Object::new();
+    Reflect::set(&ice_server_js, &"urls".into(), &ice_server.unwrap_or("stun:stun.l.google.com:19302".to_string()).into()).unwrap();
+    config_servers.push(&ice_server_js);
     config.ice_servers(&config_servers);
 
     Rc::new(RefCell::new(RtcPeerConnection::new_with_configuration(&config).expect("Failed to create RTCPeerConnection")))
 }
 
+/// Initialize RtcPeerConnection using selected signalling server endpoint, defaulting to "http://localhost:3000/connect"
 pub async fn init_peer_connection(pc: Rc<RefCell<RtcPeerConnection>>, connect_url: Option<String>, oniceconnectionstatechange: Closure<dyn Fn(JsValue)>) {
     pc.borrow().set_oniceconnectionstatechange(Some(&oniceconnectionstatechange.into_js_value().unchecked_into()));
 
@@ -73,10 +75,12 @@ pub async fn init_peer_connection(pc: Rc<RefCell<RtcPeerConnection>>, connect_ur
     pc.borrow().set_onnegotiationneeded(Some(&onnegotiationneeded.into_js_value().unchecked_into()));
 }
 
+/// Create a data channel using the given RtcPeerConnection, assigned the given label
 pub fn create_data_channel(pc: Rc<RefCell<RtcPeerConnection>>, label: &str) -> Rc<RefCell<RtcDataChannel>> {
     Rc::new(RefCell::new(pc.borrow().create_data_channel(label)))
 }
 
+/// Initialize an RtcDataChannel, with the given callback Closures
 pub fn init_data_channel(channel: Rc<RefCell<RtcDataChannel>>, onclose: Closure<dyn Fn()>, onopen: Closure<dyn Fn()>, onmessage: Closure<dyn Fn(JsValue)>) {
     channel.borrow().set_onclose(Some(&onclose.into_js_value().unchecked_into()));
     channel.borrow().set_onclose(Some(&onopen.into_js_value().unchecked_into()));

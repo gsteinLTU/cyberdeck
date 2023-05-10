@@ -2,4 +2,5 @@
 Cargo.lock
 
 examples/*/target
+examples/*/*/target
 wasm-lib/target

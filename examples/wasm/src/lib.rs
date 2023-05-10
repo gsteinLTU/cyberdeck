@@ -29,7 +29,7 @@ pub fn log(text: &str){
 
 #[wasm_bindgen]
 pub async fn run() {
-    let pc: Rc<RefCell<RtcPeerConnection>> = cyberdeck_client::create_peer_connection();
+    let pc: Rc<RefCell<RtcPeerConnection>> = cyberdeck_client::create_peer_connection(None);
     let send_channel = cyberdeck_client::create_data_channel(pc.clone(), "foo");
     
     let onclose = Closure::<dyn Fn()>::new(|| {
