@@ -3,6 +3,12 @@ name = "cyberdeck-client-web-sys"
 version = "0.1.0"
 edition = "2021"
 authors = ["Gordon Stein"]
+license = "MIT OR Apache-2.0"
+keywords = ["wasm", "webrtc"]
+description = "Create RtcPeerConnections and RtcDataChannels without leaving WASM (intended for use with cyberdeck's signalling server)"
+categories = ["wasm"]
+readme = "README.md"
+repository = "https://github.com/gsteinLTU/cyberdeck"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

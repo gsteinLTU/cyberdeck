@@ -2,7 +2,7 @@ use std::{collections::HashMap, cell::RefCell, rc::Rc};
 
 use js_sys::{Reflect};
 use wasm_bindgen::{prelude::{wasm_bindgen, Closure}, JsValue};
-use web_sys::{RtcPeerConnection, RtcDataChannel, window, Node };
+use web_sys::{RtcPeerConnection, RtcDataChannel, window };
 
 extern crate console_error_panic_hook;
 use std::panic;
