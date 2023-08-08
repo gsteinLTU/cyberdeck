@@ -42,6 +42,7 @@ pub enum PeerEvent {
 impl Peer {
     pub async fn new<T>(
         handle_message: impl Fn(u128, PeerEvent) -> T + Send + Sync + 'static,
+        stun_or_turn_urls: Option<Vec<String>>
     ) -> Result<Peer>
     where
         T: Future<Output = ()> + Send + Sync,
@@ -49,7 +50,7 @@ impl Peer {
         Peer::new_with_configuration(
             handle_message,
             Configuration {
-                stun_or_turn_urls: vec!["stun:stun.l.google.com:19302".to_owned()],
+                stun_or_turn_urls: stun_or_turn_urls.unwrap_or(vec!["stun:stun.l.google.com:19302".to_owned()]),
             },
         )
         .await
