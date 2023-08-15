@@ -25,7 +25,7 @@ pub async fn init_peer_connection(pc: Rc<RefCell<RtcPeerConnection>>, connect_ur
 
     let onicecandidate = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {    
         if Reflect::get(&event, &"candidate".into()).unwrap().is_null() {
-            let local_description = window().unwrap().btoa(&JSON::stringify(&pc_clone.borrow().local_description().unwrap().unchecked_into()).unwrap().as_string().unwrap()).unwrap();
+            let local_description = get_local_description(&pc_clone);
             let mut opts = RequestInit::new();
             opts.method("POST");
             opts.mode(RequestMode::Cors);
@@ -73,6 +73,42 @@ pub async fn init_peer_connection(pc: Rc<RefCell<RtcPeerConnection>>, connect_ur
         then.into_js_value();
     });
     pc.borrow().set_onnegotiationneeded(Some(&onnegotiationneeded.into_js_value().unchecked_into()));
+}
+
+/// Initialize RtcPeerConnection using offer already known
+pub async fn init_peer_connection_from_offer(pc: Rc<RefCell<RtcPeerConnection>>, offer: String, oniceconnectionstatechange: Closure<dyn Fn(JsValue)>) {
+    pc.borrow().set_oniceconnectionstatechange(Some(&oniceconnectionstatechange.into_js_value().unchecked_into()));
+
+    let pc_clone = pc.clone();
+
+    let onicecandidate = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {    
+        if Reflect::get(&event, &"candidate".into()).unwrap().is_null() {
+            let pc_clone_2 = pc_clone.clone();
+            let answer: String = offer.replace("\"", "");
+            let atob = window().unwrap().atob(&answer).unwrap();
+            let parsed = JSON::parse(&atob).unwrap();
+            pc_clone_2.borrow().set_remote_description(
+                &RtcSessionDescriptionInit::unchecked_from_js(parsed)
+            );
+        }
+    });
+
+    pc.borrow().set_onicecandidate(Some(&onicecandidate.into_js_value().unchecked_into()));
+
+    let pc_clone = pc.clone();
+    let onnegotiationneeded = Closure::<dyn Fn()>::new(move || {
+        let pc_clone_2 = pc_clone.clone();
+        let then = Closure::<dyn FnMut(JsValue)>::new(move |d: JsValue| {
+            pc_clone_2.borrow().set_local_description(&d.unchecked_into());
+        });
+        pc_clone.borrow().create_offer().then(&then);
+        then.into_js_value();
+    });
+    pc.borrow().set_onnegotiationneeded(Some(&onnegotiationneeded.into_js_value().unchecked_into()));
+}
+
+pub fn get_local_description(pc: &Rc<RefCell<RtcPeerConnection>>) -> String {
+    window().unwrap().btoa(&JSON::stringify(&pc.borrow().local_description().unwrap().unchecked_into()).unwrap().as_string().unwrap()).unwrap()
 }
 
 /// Create a data channel using the given RtcPeerConnection, assigned the given label

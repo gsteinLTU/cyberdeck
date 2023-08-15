@@ -119,7 +119,7 @@ async fn start_peer_connection(offer: String) -> Result<String> {
                 println!("{}::Peer connection state: {} ", peer_id, s);
             }
         }
-    })
+    }, None)
     .await?;
 
     let answer = peer.receive_offer(&offer).await?;
