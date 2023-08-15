@@ -108,7 +108,9 @@ pub async fn init_peer_connection_from_offer(pc: Rc<RefCell<RtcPeerConnection>>,
 }
 
 pub fn get_local_description(pc: &Rc<RefCell<RtcPeerConnection>>) -> String {
-    window().unwrap().btoa(&JSON::stringify(&pc.borrow().local_description().unwrap().unchecked_into()).unwrap().as_string().unwrap()).unwrap()
+    let desc = pc.borrow().local_description().unwrap();
+    let desc = &JSON::stringify(&desc.unchecked_into()).unwrap().as_string().unwrap();
+    window().unwrap().btoa(desc).unwrap()
 }
 
 /// Create a data channel using the given RtcPeerConnection, assigned the given label
