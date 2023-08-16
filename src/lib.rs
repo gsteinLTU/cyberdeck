@@ -29,7 +29,7 @@ pub type DataChannel = Arc<RTCDataChannel>;
 
 pub struct Peer {
     pub peer_id: u128,
-    peer_connection: Arc<RTCPeerConnection>,
+    pub peer_connection: Arc<RTCPeerConnection>,
     abort: mpsc::UnboundedSender<()>,
 }
 
