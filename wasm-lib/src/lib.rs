@@ -121,6 +121,6 @@ pub fn create_data_channel(pc: Rc<RefCell<RtcPeerConnection>>, label: &str) -> R
 /// Initialize an RtcDataChannel, with the given callback Closures
 pub fn init_data_channel(channel: Rc<RefCell<RtcDataChannel>>, onclose: Closure<dyn Fn()>, onopen: Closure<dyn Fn()>, onmessage: Closure<dyn Fn(JsValue)>) {
     channel.borrow().set_onclose(Some(&onclose.into_js_value().unchecked_into()));
-    channel.borrow().set_onclose(Some(&onopen.into_js_value().unchecked_into()));
+    channel.borrow().set_onopen(Some(&onopen.into_js_value().unchecked_into()));
     channel.borrow().set_onmessage(Some(&onmessage.into_js_value().unchecked_into()));
 }
